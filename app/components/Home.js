@@ -34,6 +34,7 @@ type State = {|
   // |}
 |};
 const sample = arr => arr[Math.floor(Math.random() * arr.length)];
+console.log("ipc: ", ipcRenderer);
 
 export default class Home extends Component<Props, State> {
   // props: Props;
@@ -46,6 +47,8 @@ export default class Home extends Component<Props, State> {
       logged_in: false,
       shouldChange: true
     };
+
+    console.log("ipc: ", ipcRenderer);
 
     ipcRenderer.removeAllListeners();
 

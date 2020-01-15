@@ -10,18 +10,18 @@
  *
  */
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
+// import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import LCUConnector from 'better-lcu-connector';
 import MenuBuilder from './menu';
 
-export default class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
-  }
-}
+// export default class AppUpdater {
+//   constructor() {
+//     log.transports.file.level = 'info';
+//     autoUpdater.logger = log;
+//     autoUpdater.checkForUpdatesAndNotify();
+//   }
+// }
 
 let mainWindow = null;
 
@@ -78,6 +78,7 @@ const createWindow = async () => {
       mainWindow.show();
       mainWindow.focus();
     }
+    mainWindow.webContents.openDevTools();
   });
 
   mainWindow.on('closed', () => {
@@ -89,7 +90,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  // new AppUpdater();
 
   let connector = new LCUConnector();
   console.log(connector);
@@ -99,27 +100,29 @@ const createWindow = async () => {
     connector
       .makeRequest('GET', '/lol-summoner/v1/current-summoner')
       .then(summoner => {
-        event.reply('current-summoner', summoner);
+        mainWindow.webContents.send('current-summoner', summoner);
         connector
           .makeRequest(
             'GET',
             `/lol-collections/v2/inventories/${summoner.summonerId}/summoner-icons`
           )
           .then(icons => {
-            event.reply('summoner-icon', icons);
+            mainWindow.webContents.send('summoner-icon', icons);
             connector
               .makeRequest('GET', '/lol-gameflow/v1/gameflow-phase')
               .then(data => {
-                event.reply('gameflow-phase', data);
+                mainWindow.webContents.send('gameflow-phase', data);
+                console.log("sent gamephase: ", data)
                 return data;
               })
-              .catch(() => {});
+              .catch((err, err2) => {console.log(err, err2)});
             return icons;
           })
-          .catch(() => {});
+          + full + ".png"
+        console.log("summoner: ", summoner);
         return summoner;
       })
-      .catch(() => {});
+      .catch((err, err2) => {console.log(err, err2)});
   });
 
   ipcMain.on('change-icon', (event, arg) => {
@@ -136,7 +139,7 @@ const createWindow = async () => {
         event.reply('current-summoner', summoner);
         return summoner;
       })
-      .catch(() => {});
+      .catch((err, err2) => {console.log(err, err2)});
   });
 
   connector.addHandler(
@@ -144,7 +147,7 @@ const createWindow = async () => {
     'UPDATE',
     (uri, method, data) => {
       // manage UPDATE events
-      // console.log(uri, data);
+      console.log(uri, data);
       mainWindow.webContents.send('gameflow-phase', data);
     }
   );
@@ -153,7 +156,7 @@ const createWindow = async () => {
     '/lol-summoner/v1/current-summoner',
     '*',
     (uri, method, data) => {
-      // console.log(uri, data);
+      console.log(uri, data);
       mainWindow.webContents.send('current-summoner', data, method);
     }
   );
