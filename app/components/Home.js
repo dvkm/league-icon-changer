@@ -62,19 +62,15 @@ export default class Home extends Component<Props, State> {
       });
       // console.log(data, this.state.shouldChange)
       let phase;
-      if (data == 'WaitingForStats') phase = 1;
-      else if (data == 'PreEndOfGame') phase = 2;
-      else if (data == 'EndOfGame') phase = 3;
-      else phase = 4;
 
 
-      if ((phase < 4 && phase < this.state.lastphase) && this.state.shouldChange) {
+      if (data != this.state.lastphase && this.state.lastphase == "InProgress" && this.state.shouldChange) {
         const { icons } = this.state;
         const newIcon = sample(icons);
         // console.log('Changing icon, ', newIcon);
         ipcRenderer.send('change-icon', newIcon);
       }
-      this.setState({ lastphase: phase })
+      this.setState({ lastphase: data })
     });
 
     ipcRenderer.on('summoner-icon', (event, data) => {
@@ -95,7 +91,7 @@ export default class Home extends Component<Props, State> {
         // displayName: data.displayName,
         // profileIconId: data.profileIconId,
         // summonerLeve: data.summonerLevel
-        summoner,
+        summoner: summoner,
         logged_in: true
       });
       // console.log('state:', this.state);
@@ -128,12 +124,16 @@ export default class Home extends Component<Props, State> {
             {/* <h2>Home</h2>
             <Link to={routes.COUNTER}>to Counter</Link> */}
             <p>Hello, {this.state.summoner.displayName}</p>
-            <p>current icon:</p>
-            <p>
-            <Icon icon={this.state.summoner.profileIconId} key={this.state.summoner.profileIconId} />
-            </p>
+            { this.state.summoner && this.state.summoner.profileIconId &&
+              <div className = "summoner">
+                <p>current icon:</p>
+                <p>
+                <Icon icon={this.state.summoner.profileIconId} key={this.state.summoner.profileIconId} />
+                </p>
+              </div>
+            }
             {/* <p>{JSON.stringify(summoner)}</p> */}
-            <p>Phase: { this.state.phase || "" }</p>
+            {/* <p>Phase: { this.state.phase || "" }</p> */}
             <label>
               Automatically change icon after every game:
               <input
