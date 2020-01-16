@@ -78,7 +78,7 @@ const createWindow = async () => {
       mainWindow.show();
       mainWindow.focus();
     }
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   });
 
   mainWindow.on('closed', () => {
@@ -118,7 +118,6 @@ const createWindow = async () => {
               .catch((err, err2) => {console.log(err, err2)});
             return icons;
           })
-          + full + ".png"
         console.log("summoner: ", summoner);
         return summoner;
       })

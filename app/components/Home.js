@@ -45,12 +45,15 @@ export default class Home extends Component<Props, State> {
       icons: [],
       summoner: {},
       logged_in: false,
-      shouldChange: true
+      shouldChange: true,
+      lastphase: ""
     };
 
     console.log("ipc: ", ipcRenderer);
 
     ipcRenderer.removeAllListeners();
+  }
+  componentDidMount(props) {
 
     ipcRenderer.on('gameflow-phase', (event, data) => {
       // console.log('gameflow-phase', data);
@@ -58,12 +61,20 @@ export default class Home extends Component<Props, State> {
         phase: data
       });
       // console.log(data, this.state.shouldChange)
-      if (data === 'WaitingForStats' && this.state.shouldChange) {
+      let phase;
+      if (data == 'WaitingForStats') phase = 1;
+      else if (data == 'PreEndOfGame') phase = 2;
+      else if (data == 'EndOfGame') phase = 3;
+      else phase = 4;
+
+
+      if ((phase < 4 && phase < this.state.lastphase) && this.state.shouldChange) {
         const { icons } = this.state;
         const newIcon = sample(icons);
         // console.log('Changing icon, ', newIcon);
         ipcRenderer.send('change-icon', newIcon);
       }
+      this.setState({ lastphase: phase })
     });
 
     ipcRenderer.on('summoner-icon', (event, data) => {
@@ -122,7 +133,7 @@ export default class Home extends Component<Props, State> {
             <Icon icon={this.state.summoner.profileIconId} key={this.state.summoner.profileIconId} />
             </p>
             {/* <p>{JSON.stringify(summoner)}</p> */}
-            {/* <p>Phase: { this.state.phase || "" }</p> */}
+            <p>Phase: { this.state.phase || "" }</p>
             <label>
               Automatically change icon after every game:
               <input
@@ -133,8 +144,9 @@ export default class Home extends Component<Props, State> {
             </label>
             <p>
               Icons list:
-              <IconList icons={this.state.icons || []} />
             </p>
+            <IconList icons={this.state.icons || []} />
+
           {/* </div> */}
         </header>
       </div>
