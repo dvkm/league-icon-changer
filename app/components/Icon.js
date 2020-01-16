@@ -26,7 +26,7 @@ export default class Icon extends Component {
     const { icon } = this.props
     return (
       <a onClick={this.changeIcon}>
-        <img className="icon" id={icon} src={ this.dd.images.profileicon(icon) } width="64px"></img>
+        <img className="icon" id={icon} src={ this.dd.images.profileicon(icon + ".png") } width="64px"></img>
       </a>
     )
   }
